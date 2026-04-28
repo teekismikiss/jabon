@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MeowCulator - Tu Calculadora Felina</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --cat-primary: #ffb7c5; /* Rosa pastel */
+            --cat-secondary: #fce4ec;
+            --cat-dark: #4a4a4a;
+            --cat-accent: #ffd54f;
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: #fff5f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        /* Estilo de la Calculadora */
+        .calculator-container {
+            position: relative;
+            background: white;
+            padding: 2rem;
+            border-radius: 3rem;
+            box-shadow: 0 20px 50px rgba(255, 183, 197, 0.4);
+            width: 100%;
+            max-width: 350px;
+            z-index: 10;
+        }
+
+        /* Orejas de Gato */
+        .cat-ears {
+            position: absolute;
+            top: -30px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 40px;
+            z-index: -1;
+        }
+
+        .ear {
+            width: 60px;
+            height: 60px;
+            background: var(--cat-primary);
+            border-radius: 15px;
+            transform: rotate(45deg);
+        }
+
+        .display {
+            background: var(--cat-secondary);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            text-align: right;
+            margin-bottom: 1.5rem;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            box-shadow: inset 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .previous-operand {
+            color: #888;
+            font-size: 1rem;
+            word-wrap: break-word;
+            word-break: break-all;
+        }
+
+        .current-operand {
+            color: var(--cat-dark);
+            font-size: 2rem;
+            font-weight: 700;
+            word-wrap: break-word;
+            word-break: break-all;
+        }
+
+        .buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        button {
+            border: none;
+            outline: none;
+            padding: 15px;
+            border-radius: 50%;
+            font-size: 1.25rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            aspect-ratio: 1;
+            background: #f8f8f8;
+            color: var(--cat-dark);
+        }
+
+        button:active {
+            transform: scale(0.9);
+        }
+
+        .btn-operator {
+            background: var(--cat-primary);
+            color: white;
+        }
+
+        .btn-equal {
+            background: var(--cat-accent);
+            color: var(--cat-dark);
+            grid-column: span 2;
+            border-radius: 2rem;
+            aspect-ratio: auto;
+        }
+
+        .btn-clear {
+            background: #ff8a80;
+            color: white;
+        }
+
+        /* Bigotes y decoración */
+        .whiskers {
+            position: absolute;
+            width: 100%;
+            top: 50%;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .whisker {
+            height: 2px;
+            background: rgba(0,0,0,0.05);
+            position: absolute;
+            width: 40px;
+        }
+
+        /* Animación de patita al hacer click */
+        .paw-print {
+            position: absolute;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        /* Estilo PWA Banner (Mockup) */
+        .pwa-banner {
+            position: fixed;
+            bottom: 20px;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: none;
+            align-items: center;
+            gap: 10px;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="calculator-container">
+        <!-- Orejas -->
+        <div class="cat-ears">
+            <div class="ear"></div>
+            <div class="ear"></div>
+        </div>
+
+        <!-- Pantalla -->
+        <div class="display">
+            <div id="previous-operand" class="previous-operand"></div>
+            <div id="current-operand" class="current-operand">0</div>
+        </div>
+
+        <!-- Botones -->
+        <div class="buttons-grid">
+            <button onclick="clearDisplay()" class="btn-clear">AC</button>
+            <button onclick="deleteNumber()">DEL</button>
+            <button onclick="appendOperator('%')" class="btn-operator">%</button>
+            <button onclick="appendOperator('÷')" class="btn-operator">÷</button>
+            
+            <button onclick="appendNumber('7')">7</button>
+            <button onclick="appendNumber('8')">8</button>
+            <button onclick="appendNumber('9')">9</button>
+            <button onclick="appendOperator('×')" class="btn-operator">×</button>
+            
+            <button onclick="appendNumber('4')">4</button>
+            <button onclick="appendNumber('5')">5</button>
+            <button onclick="appendNumber('6')">6</button>
+            <button onclick="appendOperator('-')" class="btn-operator">-</button>
+            
+            <button onclick="appendNumber('1')">1</button>
+            <button onclick="appendNumber('2')">2</button>
+            <button onclick="appendNumber('3')">3</button>
+            <button onclick="appendOperator('+')" class="btn-operator">+</button>
+            
+            <button onclick="appendNumber('0')">0</button>
+            <button onclick="appendNumber('.')">.</button>
+            <button onclick="compute()" class="btn-equal">🐾 =</button>
+        </div>
+
+        <!-- Decoración lateral (Bigotes) -->
+        <div class="whiskers" style="left: -45px;">
+            <div class="whisker" style="transform: rotate(10deg); top: -10px;"></div>
+            <div class="whisker" style="transform: rotate(0deg); top: 5px;"></div>
+            <div class="whisker" style="transform: rotate(-10deg); top: 20px;"></div>
+        </div>
+        <div class="whiskers" style="right: -45px; transform: scaleX(-1);">
+            <div class="whisker" style="transform: rotate(10deg); top: -10px;"></div>
+            <div class="whisker" style="transform: rotate(0deg); top: 5px;"></div>
+            <div class="whisker" style="transform: rotate(-10deg); top: 20px;"></div>
+        </div>
+    </div>
+
+    <!-- Sonido de miau opcional (Simulado con visual) -->
+    <div id="meow-msg" style="position: absolute; top: 10%; color: var(--cat-primary); font-weight: bold; font-size: 1.5rem; opacity: 0; transition: 0.5s;">¡Miau!</div>
+
+    <script>
+        let currentOperand = '0';
+        let previousOperand = '';
+        let operation = undefined;
+
+        const currentTextElement = document.getElementById('current-operand');
+        const previousTextElement = document.getElementById('previous-operand');
+        const meowMsg = document.getElementById('meow-msg');
+
+        function updateDisplay() {
+            currentTextElement.innerText = formatNumber(currentOperand);
+            if (operation != null) {
+                previousTextElement.innerText = `${formatNumber(previousOperand)} ${operation}`;
+            } else {
+                previousTextElement.innerText = '';
+            }
+        }
+
+        function formatNumber(number) {
+            if (number === 'Error') return number;
+            const stringNumber = number.toString();
+            const integerDigits = parseFloat(stringNumber.split('.')[0]);
+            const decimalDigits = stringNumber.split('.')[1];
+            let integerDisplay;
+            if (isNaN(integerDigits)) {
+                integerDisplay = '';
+            } else {
+                integerDisplay = integerDigits.toLocaleString('en', { maximumFractionDigits: 0 });
+            }
+            if (decimalDigits != null) {
+                return `${integerDisplay}.${decimalDigits}`;
+            } else {
+                return integerDisplay;
+            }
+        }
+
+        function appendNumber(number) {
+            if (number === '.' && currentOperand.includes('.')) return;
+            if (currentOperand === '0' && number !== '.') {
+                currentOperand = number.toString();
+            } else {
+                currentOperand = currentOperand.toString() + number.toString();
+            }
+            updateDisplay();
+        }
+
+        function appendOperator(op) {
+            if (currentOperand === '') return;
+            if (previousOperand !== '') {
+                compute();
+            }
+            operation = op;
+            previousOperand = currentOperand;
+            currentOperand = '';
+            updateDisplay();
+        }
+
+        function clearDisplay() {
+            currentOperand = '0';
+            previousOperand = '';
+            operation = undefined;
+            updateDisplay();
+        }
+
+        function deleteNumber() {
+            currentOperand = currentOperand.toString().slice(0, -1);
+            if (currentOperand === '') currentOperand = '0';
+            updateDisplay();
+        }
+
+        function compute() {
+            let computation;
+            const prev = parseFloat(previousOperand);
+            const current = parseFloat(currentOperand);
+            if (isNaN(prev) || isNaN(current)) return;
+
+            switch (operation) {
+                case '+':
+                    computation = prev + current;
+                    break;
+                case '-':
+                    computation = prev - current;
+                    break;
+                case '×':
+                    computation = prev * current;
+                    break;
+                case '÷':
+                    if (current === 0) {
+                        computation = "Error";
+                    } else {
+                        computation = prev / current;
+                    }
+                    break;
+                case '%':
+                    computation = prev % current;
+                    break;
+                default:
+                    return;
+            }
+
+            currentOperand = computation;
+            operation = undefined;
+            previousOperand = '';
+            
+            // Efecto Miau al calcular
+            showMeow();
+            updateDisplay();
+        }
+
+        function showMeow() {
+            meowMsg.style.opacity = '1';
+            setTimeout(() => {
+                meowMsg.style.opacity = '0';
+            }, 1000);
+        }
+
+        // Service Worker para PWA (Inline para el ejemplo)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const swCode = `
+                    self.addEventListener('install', (e) => {
+                        console.log('SW Installed');
+                    });
+                    self.addEventListener('fetch', (e) => {
+                        e.respondWith(fetch(e.request));
+                    });
+                `;
+                const blob = new Blob([swCode], { type: 'text/javascript' });
+                const swUrl = URL.createObjectURL(blob);
+                navigator.serviceWorker.register(swUrl).catch(err => console.log(err));
+            });
+        }
+    </script>
+</body>
+</html>
